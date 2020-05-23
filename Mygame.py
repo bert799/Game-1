@@ -14,7 +14,7 @@ WINDOW_SIZE = (600,400)
 
 screen = pygame.display.set_mode(WINDOW_SIZE,0,32) #inicializa a imgemm
 
-display = pygame.Surface((300,200)) #superfície do personagem
+display = pygame.Surface((300,200)) #tamanho que será mostrado
 
 moving_right = False
 moving_left = False
@@ -74,8 +74,9 @@ mapa_jog = carrega_o_mapa ('map')
 ###
 
 #incializa as colisões em x e y do retângulo do personagem
-ground_img = pygame.image.load('dirt.png')
-plataform_img = pygame.image.load('grass.png')
+
+ground_img = pygame.image.load('ground_1.png')
+plataform_img = pygame.image.load('platform.png')
 
 player_action = 'idle'
 player_frame = 0
@@ -144,7 +145,8 @@ while True:
             pygame.draw.rect(display,(14,222,150),obj_rect)
         else:
             pygame.draw.rect(display,(9,91,85),obj_rect)
-    #
+
+#adiciona as plataformas e grouds
     tile_rects = []
     y=0
     for layer in mapa_jog:
@@ -159,7 +161,7 @@ while True:
             x+=1
         y +=1
 
-#movimento
+#movimento + gravidade + animacoes
     player_movement = [0,0]
     if moving_right == True:
         player_movement[0] +=2
@@ -197,7 +199,7 @@ while True:
     player_img = animation_frames[player_img_id]
     display.blit(pygame.transform.flip(player_img,player_flip,False),(player_rect.x-scroll[0],player_rect.y-scroll[1]))
 
-
+#movimentacao com o teclado
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
