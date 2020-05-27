@@ -77,12 +77,14 @@ mapa_jog = carrega_o_mapa ('map')
 
 ground_img = pygame.image.load('ground_1.png')
 plataform_img = pygame.image.load('platform.png')
+wall_img = pygame.image.load('wall.png')
+door_img = pygame.image.load('door.png')
 
 player_action = 'idle'
 player_frame = 0
 player_flip = False
 
-player_rect = pygame.Rect(100,100,20,27) # ajusta o tamanho do personagem com as plataformas
+player_rect = pygame.Rect(100,100,16,27) # ajusta o tamanho do personagem com as plataformas
 ###
 
 #objetos no fundo do mapa
@@ -152,6 +154,10 @@ while True:
     for layer in mapa_jog:
         x=0
         for tile in layer:
+            if tile == 'W':
+                display.blit(wall_img, (x*16 - scroll[0], y*16 - scroll[1]))
+            if tile == 'D':
+                display.blit(door_img, (x*16 - scroll[0], y*16 - scroll[1]))
             if tile == '1':
                 display.blit(ground_img, (x*16 - scroll[0], y*16 - scroll[1]))
             if tile == '2':
