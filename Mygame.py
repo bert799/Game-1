@@ -77,49 +77,55 @@ mapa_jog = carrega_o_mapa ('map')
 
 ground_img = pygame.image.load('ground_1.png')
 plataform_img = pygame.image.load('platform.png')
+wall_img = pygame.image.load('wall.png')
+door_img = pygame.image.load('door.png')
 
 player_action = 'idle'
 player_frame = 0
 player_flip = False
 
-player_rect = pygame.Rect(100,100,20,27) # ajusta o tamanho do personagem com as plataformas
+player_rect = pygame.Rect(100,100,16,27) # ajusta o tamanho do personagem com as plataformas
 ###
 
 #objetos no fundo do mapa
 background_objects = [[0.25,[120,10,70,400]],[0.25,[280,30,40,400]],[0.5,[30,40,40,400]],[0.5,[130,90,100,400]],[0.5,[300,80,120,400]]]
 ###
 
-def collision_test(rect,tiles):
+def collision_test(rect,tiles,names):
     hit_list = []
+    name = ''
     for tile in tiles:
         if rect.colliderect(tile):
             hit_list.append(tile)
-    return hit_list
+            for key in names:
+                if tile in names[key]:
+                    name = key
+    return hit_list, name
 
 #colisões e movimentos##
-def move(rect,movement,tiles):
+def move(rect,movement,tiles,names):
    
     collision_types = {'top':False, 'bottom':False, 'right':False, 'left': False}
    
     rect.x += movement[0]
    
-    hit_list = collision_test(rect, tiles)
-   
+    hit_list, tile_type = collision_test(rect, tiles, names)
+    
     for tile in hit_list:
-        if movement[0] > 0:
+        if movement[0] > 0 and tile_type != '2':
             rect.right = tile.left
             collision_types['right'] = True
-        elif movement[0] < 0:
+        elif movement[0] < 0 and tile_type != '2':
             rect.left = tile.right
             collision_types['left'] = True
     rect.y += movement[1]
-    hit_list = collision_test(rect, tiles)
+    hit_list, tile_type = collision_test(rect, tiles, names)
     
     for tile in hit_list:
-        if movement [1] > 0:
+        if movement [1] > 0 :
             rect.bottom = tile.top 
             collision_types['bottom'] = True
-        elif movement[1] < 0:
+        elif movement[1] < 0 and tile_type != '2':
             rect.top = tile.bottom
             collision_types['top'] = True
     return rect, collision_types
@@ -148,16 +154,28 @@ while True:
 
 #adiciona as plataformas e grouds
     tile_rects = []
+    tile_names = {}
+    #platf_rects = []
+    #door_rects = []
     y=0
     for layer in mapa_jog:
         x=0
         for tile in layer:
+            if tile == 'W':
+                display.blit(wall_img, (x*16 - scroll[0], y*16 - scroll[1]))
+            if tile == 'D':
+                display.blit(door_img, (x*16 - scroll[0], y*16 - scroll[1]))
             if tile == '1':
                 display.blit(ground_img, (x*16 - scroll[0], y*16 - scroll[1]))
             if tile == '2':
                 display.blit(plataform_img, (x*16 - scroll[0], y*16 - scroll[1]))
             if tile != '0':
                 tile_rects.append(pygame.Rect(x*16, y*16, 16,16))
+                if tile in tile_names:
+                    tile_names[tile].append(pygame.Rect(x*16, y*16, 16,16))    
+                else:
+                    tile_names[tile] = []
+                
             x+=1
         y +=1
 
@@ -182,7 +200,7 @@ while True:
         player_action,player_frame = change_action(player_action,player_frame,'run')
 
 
-    player_rect,collisions = move(player_rect,player_movement,tile_rects)
+    player_rect,collisions = move(player_rect,player_movement,tile_rects,tile_names)
 
 ##estabelece o tempo no ar
     if collisions['bottom'] == True:
@@ -221,3 +239,4 @@ while True:
     screen.blit(pygame.transform.scale(display, WINDOW_SIZE),(0,0))
     pygame.display.update()
     clock.tick(60 )# mantem o jogo em 60fps
+
