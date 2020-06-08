@@ -17,6 +17,11 @@ screen = pygame.display.set_mode(WINDOW_SIZE,0,32) #inicializa a imgemm
 
 display = pygame.Surface((300,200)) #tamanho que será mostrado
 
+levels = ['map1', 'map2']
+numero_nivel = 0
+
+trigger_transition = False
+
 moving_right = False
 moving_left = False
 player_y_momentum = 0 #gravidade
@@ -83,7 +88,6 @@ animation_database = {}
 animation_database['run'] = load_animation('player_animations/run',[10,10,10,10,10,10,10,10,10,10])
 animation_database['idle'] = load_animation('player_animations/idle',[10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10])
 
-mapa_jog = carrega_o_mapa ('map')
 ###
 
 #incializa as colisões em x e y do retângulo do personagem
@@ -164,8 +168,11 @@ def deteccao_porta(rect,tiles,names):
 
 while True:
     display.fill((146,244,255))
-    #adicona o scroll ao mapa e o faz seguir o player
+    #if trigger_transition:
 
+    mapa = carrega_o_mapa(levels[numero_nivel])
+
+    #adicona o scroll ao mapa e o faz seguir o player
     true_scroll[0] += (player_rect.x - true_scroll[0] - 130)/10
     true_scroll[1] += (player_rect.y - true_scroll[1] - 95)/10
     scroll = true_scroll.copy()
@@ -186,7 +193,7 @@ while True:
     tile_rects = []
     tile_names = {}
     y=0
-    for layer in mapa_jog:
+    for layer in mapa:
         x=0
         for tile in layer:
             if tile == 'W':
@@ -232,25 +239,38 @@ while True:
 
 ##Caso se o jogador tiver que interagir com uma porta
     if em_frente_porta:
-        print('h')
         if event.type == KEYDOWN:
             if event.key == K_e:
                 pygame.time.delay(100)
-                if local_porta == tile_names['D'][0]:
-                    print('b')
-                    player_rect.x = 32
-                    player_rect.y = 864
-                elif local_porta == tile_names['D'][1]:
-                    player_rect.x = 592
-                    player_rect.y = 400
-                elif local_porta == tile_names['D'][2]:
-                    player_rect.x = 480
-                    player_rect.y = 192
-                elif local_porta == tile_names['D'][4]:
-                    player_rect.x = 64
-                    player_rect.y = 192
+                trigger_transition = True
+                # detecta qual mapa o jogador se encontra
+                if levels[numero_nivel] == 'map1':
+                    #define qual local o jogador sera teletransportado
+                    if local_porta == tile_names['D'][0]:
+                        player_rect.x = tile_names['D'][4].x
+                        player_rect.y = tile_names['D'][4].y
+                    elif local_porta == tile_names['D'][1]:
+                        player_rect.x = tile_names['D'][2].x
+                        player_rect.y = tile_names['D'][2].y
+                    elif local_porta == tile_names['D'][2]:
+                        player_rect.x = tile_names['D'][1].x
+                        player_rect.y = tile_names['D'][1].y
+                    #muda o mapa do jogador
+                    elif local_porta == tile_names['D'][3]:
+                        numero_nivel = 1
+                        last_door = tile_names['D'][3]
+                        player_rect.x = 96
+                        player_rect.y = 80
+                        
+                    elif local_porta == tile_names['D'][4]:
+                        player_rect.x = tile_names['D'][0].x
+                        player_rect.y = tile_names['D'][0].y
+                elif levels[numero_nivel] == 'map2':
+                    if local_porta == tile_names['D'][0]:
+                        numero_nivel = 0
+                        player_rect.x = last_door.x
+                        player_rect.y = last_door.y
     elif not em_frente_porta:
-        print('f')
         e_prompt_img.fill(TRANSPARENT)
 
 ##estabelece o tempo no ar
@@ -286,7 +306,7 @@ while True:
                 moving_right = False
             if event.key == K_LEFT:
                 moving_left = False
-    print(tile_names['D'])  
+                
     enemy_list.draw(screen)
     screen.blit(pygame.transform.scale(display, WINDOW_SIZE),(0,0))
     pygame.display.update()
