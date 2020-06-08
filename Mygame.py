@@ -26,6 +26,18 @@ air_timer = 0
 true_scroll = [0,0]
 ##
 
+#spawna inimigo#
+class Enemy(pygame.sprite.Sprite):
+    
+    def __init__(self,x,y,img):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(os.path.join('player_animations',img))
+        self.image.convert_alpha()
+        self.image.set_colorkey(255,255)
+        self.rect = pygame.Rect(100,100,16,27)
+        self.rect.x = x
+        self.rect.y = y
+
 #chama o arquivo txt do mapa
 def carrega_o_mapa(path):
     m = open (path + '.txt', 'r')
@@ -85,6 +97,10 @@ e_prompt_img = pygame.image.load('e.png')
 player_action = 'idle'
 player_frame = 0
 player_flip = False
+
+enemy   = Enemy(34,864,'enemie.png')# spawn enemy
+enemy_list = pygame.sprite.Group()   # create enemy group
+enemy_list.add(enemy) 
 
 player_rect = pygame.Rect(100,100,16,27) # ajusta o tamanho do personagem com as plataformas
 ###
@@ -186,8 +202,7 @@ while True:
                 if tile in tile_names:
                     tile_names[tile].append(pygame.Rect(x*16, y*16, 16,16))    
                 else:
-                    tile_names[tile] = [(pygame.Rect(x*16, y*16, 16,16))]
-                
+                    tile_names[tile] = [(pygame.Rect(x*16, y*16, 16,16))]    
             x+=1
         y +=1
 
@@ -271,8 +286,10 @@ while True:
                 moving_right = False
             if event.key == K_LEFT:
                 moving_left = False
-    print(tile_names['D'])
+    print(tile_names['D'])  
+    enemy_list.draw(screen)
     screen.blit(pygame.transform.scale(display, WINDOW_SIZE),(0,0))
     pygame.display.update()
+    pygame.display.flip()
     clock.tick(60 )# mantem o jogo em 60fps
 
