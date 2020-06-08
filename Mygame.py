@@ -11,6 +11,7 @@ pygame.init()
 pygame.display.set_caption('Meu game')
 
 WINDOW_SIZE = (600,400)
+TRANSPARENT = (0,0,0,0)
 
 screen = pygame.display.set_mode(WINDOW_SIZE,0,32) #inicializa a imgemm
 
@@ -79,6 +80,7 @@ ground_img = pygame.image.load('ground_1.png')
 plataform_img = pygame.image.load('platform.png')
 wall_img = pygame.image.load('wall.png')
 door_img = pygame.image.load('door.png')
+e_prompt_img = pygame.image.load('e.png')
 
 player_action = 'idle'
 player_frame = 0
@@ -112,23 +114,35 @@ def move(rect,movement,tiles,names):
     hit_list, tile_type = collision_test(rect, tiles, names)
     
     for tile in hit_list:
-        if movement[0] > 0 and tile_type != '2':
+        if movement[0] > 0 and tile_type != '2' and tile_type !='D':
             rect.right = tile.left
             collision_types['right'] = True
-        elif movement[0] < 0 and tile_type != '2':
+        elif movement[0] < 0 and tile_type != '2' and tile_type !='D':
             rect.left = tile.right
             collision_types['left'] = True
     rect.y += movement[1]
     hit_list, tile_type = collision_test(rect, tiles, names)
     
     for tile in hit_list:
-        if movement [1] > 0 :
+        if movement [1] > 0 and tile_type !='D':
             rect.bottom = tile.top 
             collision_types['bottom'] = True
-        elif movement[1] < 0 and tile_type != '2':
+        elif movement[1] < 0 and tile_type != '2' and tile_type !='D':
             rect.top = tile.bottom
             collision_types['top'] = True
+        
     return rect, collision_types
+
+def deteccao_porta(rect,tiles,names):
+    coordinates = 0
+    hit_list, tile_type = collision_test(rect, tiles,names)
+    for tile in hit_list:
+        if tile_type == 'D':
+            coordinates = tile
+            return True, coordinates
+        
+    
+    return False, coordinates    
 
 #loop do jogo
 
@@ -155,8 +169,6 @@ while True:
 #adiciona as plataformas e grouds
     tile_rects = []
     tile_names = {}
-    #platf_rects = []
-    #door_rects = []
     y=0
     for layer in mapa_jog:
         x=0
@@ -174,7 +186,7 @@ while True:
                 if tile in tile_names:
                     tile_names[tile].append(pygame.Rect(x*16, y*16, 16,16))    
                 else:
-                    tile_names[tile] = []
+                    tile_names[tile] = [(pygame.Rect(x*16, y*16, 16,16))]
                 
             x+=1
         y +=1
@@ -201,6 +213,30 @@ while True:
 
 
     player_rect,collisions = move(player_rect,player_movement,tile_rects,tile_names)
+    em_frente_porta,local_porta = deteccao_porta(player_rect,tile_rects, tile_names)
+
+##Caso se o jogador tiver que interagir com uma porta
+    if em_frente_porta:
+        print('h')
+        if event.type == KEYDOWN:
+            if event.key == K_e:
+                pygame.time.delay(100)
+                if local_porta == tile_names['D'][0]:
+                    print('b')
+                    player_rect.x = 32
+                    player_rect.y = 864
+                elif local_porta == tile_names['D'][1]:
+                    player_rect.x = 592
+                    player_rect.y = 400
+                elif local_porta == tile_names['D'][2]:
+                    player_rect.x = 480
+                    player_rect.y = 192
+                elif local_porta == tile_names['D'][4]:
+                    player_rect.x = 64
+                    player_rect.y = 192
+    elif not em_frente_porta:
+        print('f')
+        e_prompt_img.fill(TRANSPARENT)
 
 ##estabelece o tempo no ar
     if collisions['bottom'] == True:
@@ -235,7 +271,7 @@ while True:
                 moving_right = False
             if event.key == K_LEFT:
                 moving_left = False
-    
+    print(tile_names['D'])
     screen.blit(pygame.transform.scale(display, WINDOW_SIZE),(0,0))
     pygame.display.update()
     clock.tick(60 )# mantem o jogo em 60fps
