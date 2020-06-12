@@ -9,13 +9,14 @@ pygame.init()
 
 #nome da janela
 pygame.display.set_caption('Meu game')
-
-WINDOW_SIZE = (600,400)
+WIDTH = 600
+HEIGHT = 400
+WINDOW_SIZE = (WIDTH,HEIGHT)
 TRANSPARENT = (0,0,0,0)
 
 screen = pygame.display.set_mode(WINDOW_SIZE,0,32) #inicializa a imgemm
 
-display = pygame.Surface((300,200)) #tamanho que será mostrado
+display = pygame.Surface((WIDTH/2,HEIGHT/2)) #tamanho que será mostrado
 
 levels = ['map1', 'map2']
 numero_nivel = 0
@@ -33,13 +34,12 @@ true_scroll = [0,0]
 
 #spawna inimigo#
 class Enemy(pygame.sprite.Sprite):
-    
     def __init__(self,x,y,img):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(os.path.join('player_animations',img))
         self.image.convert_alpha()
-        self.image.set_colorkey(255,255)
-        self.rect = pygame.Rect(100,100,16,27)
+        self.image.set_colorkey((255,255,255))
+        self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
 
@@ -97,12 +97,14 @@ plataform_img = pygame.image.load('platform.png')
 wall_img = pygame.image.load('wall.png')
 door_img = pygame.image.load('door.png')
 e_prompt_img = pygame.image.load('e.png')
+chest_img = pygame.image.load(os.path.join('tile_set', 'Chest.png'))
+open_chest_img = pygame.image.load(os.path.join('tile_set', 'open_chest.png'))
 
 player_action = 'idle'
 player_frame = 0
 player_flip = False
 
-enemy   = Enemy(34,864,'enemie.png')# spawn enemy
+enemy   = Enemy(32,72,'enemie.png')# spawn enemy
 enemy_list = pygame.sprite.Group()   # create enemy group
 enemy_list.add(enemy) 
 
@@ -112,6 +114,16 @@ player_rect = pygame.Rect(100,100,16,27) # ajusta o tamanho do personagem com as
 #objetos no fundo do mapa
 background_objects = [[0.25,[120,10,70,400]],[0.25,[280,30,40,400]],[0.5,[30,40,40,400]],[0.5,[130,90,100,400]],[0.5,[300,80,120,400]]]
 ###
+
+def abre_o_bau(map_file, num_chest):
+    line_chest = (tile_names['C'][num_chest].y)/16
+    with open(map_file, 'r') as map_data:
+        blocos = map_data.readlines()
+        location_chest = str(blocos[int(line_chest)])
+        change_chest = location_chest.replace('C', 'O') 
+        blocos[int(line_chest)] = change_chest
+    with open(map_file, 'w') as map_data:
+        map_data.writelines(blocos)
 
 def collision_test(rect,tiles,names):
     hit_list = []
@@ -134,20 +146,20 @@ def move(rect,movement,tiles,names):
     hit_list, tile_type = collision_test(rect, tiles, names)
     
     for tile in hit_list:
-        if movement[0] > 0 and tile_type != '2' and tile_type !='D':
+        if movement[0] > 0 and tile_type != '2' and tile_type !='D' and tile_type !='C' and tile_type !='O':
             rect.right = tile.left
             collision_types['right'] = True
-        elif movement[0] < 0 and tile_type != '2' and tile_type !='D':
+        elif movement[0] < 0 and tile_type != '2' and tile_type !='D' and tile_type !='C' and tile_type !='O':
             rect.left = tile.right
             collision_types['left'] = True
     rect.y += movement[1]
     hit_list, tile_type = collision_test(rect, tiles, names)
     
     for tile in hit_list:
-        if movement [1] > 0 and tile_type !='D':
+        if movement [1] > 0 and tile_type !='D' and tile_type !='C' and tile_type !='O':
             rect.bottom = tile.top 
             collision_types['bottom'] = True
-        elif movement[1] < 0 and tile_type != '2' and tile_type !='D':
+        elif movement[1] < 0 and tile_type != '2' and tile_type !='D' and tile_type !='C' and tile_type !='O':
             rect.top = tile.bottom
             collision_types['top'] = True
         
@@ -157,7 +169,7 @@ def deteccao_porta(rect,tiles,names):
     coordinates = 0
     hit_list, tile_type = collision_test(rect, tiles,names)
     for tile in hit_list:
-        if tile_type == 'D':
+        if tile_type == 'D' or tile_type == 'C':
             coordinates = tile
             return True, coordinates
         
@@ -200,6 +212,10 @@ while True:
                 display.blit(wall_img, (x*16 - scroll[0], y*16 - scroll[1]))
             if tile == 'D':
                 display.blit(door_img, (x*16 - scroll[0], y*16 - scroll[1]))
+            if tile == 'C':
+                display.blit(chest_img, (x*16 - scroll[0],y*16 - scroll[1]))
+            if tile == 'O':
+                display.blit(open_chest_img, (x*16 - scroll[0],y*16 - scroll[1]))    
             if tile == '1':
                 display.blit(ground_img, (x*16 - scroll[0], y*16 - scroll[1]))
             if tile == '2':
@@ -261,7 +277,8 @@ while True:
                         last_door = tile_names['D'][3]
                         player_rect.x = 96
                         player_rect.y = 80
-                        
+                    elif local_porta == tile_names['C'][0]:
+                        abre_o_bau('map1.txt', 0)
                     elif local_porta == tile_names['D'][4]:
                         player_rect.x = tile_names['D'][0].x
                         player_rect.y = tile_names['D'][0].y
@@ -307,9 +324,9 @@ while True:
             if event.key == K_LEFT:
                 moving_left = False
                 
-    enemy_list.draw(screen)
+    enemy_list.draw(display)
     screen.blit(pygame.transform.scale(display, WINDOW_SIZE),(0,0))
     pygame.display.update()
     pygame.display.flip()
-    clock.tick(60 )# mantem o jogo em 60fps
+    clock.tick(60)# mantem o jogo em 60fps
 
