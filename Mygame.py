@@ -1,4 +1,3 @@
-
 #importa as funções iniciais
 import pygame, sys, os, random
 
@@ -71,7 +70,14 @@ e_prompt_img = pygame.image.load('data/img/e.png')
 chest_img = pygame.image.load('data/img/Chest.png')
 open_chest_img = pygame.image.load('data/img/open_chest.png')
 
+# Imagens de background
 background1 = pygame.image.load('data/img/background1.png')
+background2 = pygame.image.load('data/img/background2.png')
+backgrounds = [background1, background2]
+background_rects = []
+for background in backgrounds:
+     for background in backgrounds:
+        background_rects.append(background.get_rect())
 
 
 #Musicas
@@ -130,13 +136,34 @@ while True:
     
 
     # adiciona o background
-    pygame.draw.rect(display,(7,80,75),pygame.Rect(0,120,300,80))
-    for background_object in background_objects:
-        obj_rect = pygame.Rect(background_object[1][0]-scroll[0]*background_object[0],background_object[1][1]-scroll[1]*background_object[0],background_object[1][2],background_object[1][3])
-        if background_object[0] == 0.5:
-            pygame.draw.rect(display,(14,222,150),obj_rect)
-        else:
-            pygame.draw.rect(display,(9,91,85),obj_rect)
+    #pygame.draw.rect(display,(7,80,75),pygame.Rect(0,120,300,80))
+    #for background_object in background_objects:
+        #obj_rect = pygame.Rect(background_object[1][0]-scroll[0]*background_object[0],background_object[1][1]-scroll[1]*background_object[0],background_object[1][2],background_object[1][3])
+        #if background_object[0] == 0.5:
+            #pygame.draw.rect(display,(14,222,150),obj_rect)
+        #else:
+            #pygame.draw.rect(display,(9,91,85),obj_rect)
+
+    # Atualiza a posição de cada camada do fundo e desenha
+    for i in range(len(backgrounds)):
+        #world_speed = world_speeds[i]
+        background = backgrounds[i]
+        background_rect = background_rects[i]
+
+        # Atualiza a posição da imagem de fundo.
+        background_rect.x += -scroll[0]/16
+        # Se o fundo saiu da janela, faz ele voltar para dentro.
+        if background_rect.right < 0:
+            background_rect.x += background_rect.width
+        # Desenha o fundo e uma cópia para a direita.
+        # Assumimos que a imagem selecionada ocupa pelo menos o tamanho da janela.
+        # Além disso, ela deve ser cíclica, ou seja, o lado esquerdo deve ser continuação do direito.
+        display.blit(background, background_rect)
+        # Desenhamos a imagem novamente, mas deslocada da largura da imagem em x.
+        background_rect2 = background_rect.copy()
+        background_rect2.x += -scroll[0]/16
+        display.blit(background, background_rect2)
+
 
 #adiciona as plataformas, grouds e outros objetos definidos no mapa
     tile_rects = []
@@ -260,7 +287,7 @@ while True:
             enemy[1].display(display,scroll)
 
             if player.obj.rect.colliderect(enemy[1].obj.rect):
-                vertical_momentum = -4
+                player_y_momentum = -4
     
 #movimentacao com o teclado
     for event in pygame.event.get():
