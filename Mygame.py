@@ -41,6 +41,7 @@ air_timer = 0
 true_scroll = [0,0]
 ##
 
+
 #chama o arquivo txt do mapa
 def carrega_o_mapa(path):
     m = open (path + '.txt', 'r')
@@ -72,6 +73,7 @@ open_chest_img = pygame.image.load('data/img/open_chest.png')
 
 #Musicas
 jump_sound = pygame.mixer.Sound('data/audio/jump.wav')
+jump_sound.set_volume(0.2)
 sons_passo = [pygame.mixer.Sound('data/audio/passo_0.wav'), pygame.mixer.Sound('data/audio/passo_1.wav')]
 sons_passo[0].set_volume(0.2) #ajusta altura do som
 sons_passo[1].set_volume(0.2) ##
@@ -80,6 +82,10 @@ sons_passo[1].set_volume(0.2) ##
 pygame.mixer.music.load('data/audio/music.wav')
 pygame.mixer.music.play(-1) #-1 para deixar a musica tocando infinitamente
 #
+
+enemies = []
+for i in range(5):
+    enemies.append([0,e.Geral(300,80,13,13,'enemy')])
 
 tempo_passo = 0
 
@@ -168,6 +174,8 @@ while True:
     if player_y_momentum > 3:
         player_y_momentum = 3
 
+    if player_y_momentum == 3:
+        player.set_action('run')
     if player_movement[0] == 0:
         player.set_action('idle')
     if player_movement[0] > 0:
@@ -227,11 +235,30 @@ while True:
                 random.choice(sons_passo).play()
     else:
         air_timer += 1
-  
 #estabelece as animações
     player.change_frame(1)
     player.display(display,scroll)
 
+    display_r = pygame.Rect(scroll[0],scroll[1],300,200)
+
+    for enemy in enemies:
+        if display_r.colliderect(enemy[1].obj.rect):
+            enemy[0] += 0.2
+            if enemy[0] > 3:
+                enemy[0] = 3
+            enemy_movement = [0,enemy[0]]
+            if player.x > enemy[1].x + 5:
+                enemy_movement[0] = 1
+            if player.x < enemy[1].x - 5:
+                enemy_movement[0] = -1
+            collision_types = enemy[1].move(enemy_movement,tile_rects,names=[])
+            if collision_types['bottom'] == True:
+                enemy[0] = 0
+            enemy[1].display(display,scroll)
+
+            if player.obj.rect.colliderect(enemy[1].obj.rect):
+                vertical_momentum = -4
+    
 #movimentacao com o teclado
     for event in pygame.event.get():
         if event.type == QUIT:
