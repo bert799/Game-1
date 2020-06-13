@@ -23,8 +23,8 @@ def collision_test(object_1, object_list, names):
     return collision_list, name
 
 # função modifica o mapa para que os baus que foram abertos fiquem abertos
-def abre_o_bau(map_file, num_chest):
-    line_chest = (tile_names['C'][num_chest].y)/16
+def abre_o_bau(map_file, names, num_chest):
+    line_chest = (names['C'][num_chest].y)/16
     with open(map_file, 'r') as map_data:
         blocos = map_data.readlines()
         location_chest = str(blocos[int(line_chest)])

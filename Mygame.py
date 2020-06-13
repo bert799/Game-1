@@ -1,4 +1,3 @@
-
 #importa as funções iniciais
 import pygame, sys, os, random
 
@@ -71,6 +70,16 @@ e_prompt_img = pygame.image.load('data/img/e.png')
 chest_img = pygame.image.load('data/img/Chest.png')
 open_chest_img = pygame.image.load('data/img/open_chest.png')
 
+# Imagens de background
+background1 = pygame.image.load('data/img/background1.png')
+background2 = pygame.image.load('data/img/background2.png')
+backgrounds = [background1, background2]
+background_rects = []
+for background in backgrounds:
+     for background in backgrounds:
+        background_rects.append(background.get_rect())
+
+
 #Musicas
 jump_sound = pygame.mixer.Sound('data/audio/jump.wav')
 jump_sound.set_volume(0.2)
@@ -107,7 +116,7 @@ def deteccao_porta(object_1,object_list,names):
     coordinates = 0
     collision_list, tile_type = e.collision_test(object_1, object_list, names)
     for obj in collision_list:
-        if tile_type == 'D':
+        if tile_type == 'D' or tile_type == 'C':
             coordinates = obj
             return True, coordinates
     return False, coordinates    
@@ -133,13 +142,34 @@ while True:
     
 
     # adiciona o background
-    pygame.draw.rect(display,(7,80,75),pygame.Rect(0,120,300,80))
-    for background_object in background_objects:
-        obj_rect = pygame.Rect(background_object[1][0]-scroll[0]*background_object[0],background_object[1][1]-scroll[1]*background_object[0],background_object[1][2],background_object[1][3])
-        if background_object[0] == 0.5:
-            pygame.draw.rect(display,(14,222,150),obj_rect)
-        else:
-            pygame.draw.rect(display,(9,91,85),obj_rect)
+    #pygame.draw.rect(display,(7,80,75),pygame.Rect(0,120,300,80))
+    #for background_object in background_objects:
+        #obj_rect = pygame.Rect(background_object[1][0]-scroll[0]*background_object[0],background_object[1][1]-scroll[1]*background_object[0],background_object[1][2],background_object[1][3])
+        #if background_object[0] == 0.5:
+            #pygame.draw.rect(display,(14,222,150),obj_rect)
+        #else:
+            #pygame.draw.rect(display,(9,91,85),obj_rect)
+
+    # Atualiza a posição de cada camada do fundo e desenha
+    for i in range(len(backgrounds)):
+        #world_speed = world_speeds[i]
+        background = backgrounds[i]
+        background_rect = background_rects[i]
+
+        # Atualiza a posição da imagem de fundo.
+        background_rect.x += -scroll[0]/16
+        # Se o fundo saiu da janela, faz ele voltar para dentro.
+        if background_rect.right < 0:
+            background_rect.x += background_rect.width
+        # Desenha o fundo e uma cópia para a direita.
+        # Assumimos que a imagem selecionada ocupa pelo menos o tamanho da janela.
+        # Além disso, ela deve ser cíclica, ou seja, o lado esquerdo deve ser continuação do direito.
+        display.blit(background, background_rect)
+        # Desenhamos a imagem novamente, mas deslocada da largura da imagem em x.
+        background_rect2 = background_rect.copy()
+        background_rect2.x += -scroll[0]/16
+        display.blit(background, background_rect2)
+
 
 #adiciona as plataformas, grouds e outros objetos definidos no mapa
     tile_rects = []
@@ -197,15 +227,15 @@ while True:
 
 # Caso se o jogador tiver que interagir com uma porta
     if em_frente_porta:
-        if event.type == KEYDOWN:
+        if event.type == KEYUP:
             if event.key == K_e:
                 pygame.time.delay(200)
                 # detecta qual mapa o jogador se encontra
                 if levels[numero_nivel] == 'map1':
                     #define qual local o jogador sera teletransportado
                     if local_porta == tile_names['D'][0]:
-                        player.x = tile_names['D'][4].x
-                        player.y = tile_names['D'][4].y
+                        player.x = player.x+2
+                        player.y = player.y +2
                     elif local_porta == tile_names['D'][1]:
                         player.x = tile_names['D'][2].x
                         player.y = tile_names['D'][2].y
@@ -216,13 +246,13 @@ while True:
                     elif local_porta == tile_names['D'][3]:
                         numero_nivel = 1
                         last_door = tile_names['D'][3]
-                        player.x = 96
-                        player.y = 80
-                    elif local_porta == tile_names['C'][0]:
-                        e.abre_o_bau('map1.txt', 0)
+                        player.x = 0
+                        player.y = 0
                     elif local_porta == tile_names['D'][4]:
                         player.x = tile_names['D'][0].x
-                        player.y = tile_names['D'][0].y
+                        player.y = tile_names['D'][0].y    
+                    elif local_porta == tile_names['C'][0]:
+                        e.abre_o_bau('map1.txt', tile_names, 0)        
                 elif levels[numero_nivel] == 'map2':
                     if local_porta == tile_names['D'][0]:
                         numero_nivel = 0
@@ -290,7 +320,7 @@ while True:
                 moving_right = False
             if event.key == K_LEFT:
                 moving_left = False
-
+    #print(player.x, player.y, tile_names['D'][4].x, tile_names['D'][4].y)
     screen.blit(pygame.transform.scale(display, WINDOW_SIZE),(0,0))
     pygame.display.update()
     clock.tick(60 )# mantem o jogo em 60fps
