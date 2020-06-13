@@ -89,12 +89,18 @@ sons_passo[1].set_volume(0.2) ##
 
 #musica tema
 pygame.mixer.music.load('data/audio/music.wav')
+pygame.mixer.music.set_volume(0.4)
+
 pygame.mixer.music.play(-1) #-1 para deixar a musica tocando infinitamente
 #
 
 enemies = []
 for i in range(5):
     enemies.append([0,e.Geral(300,80,13,13,'enemy')])
+    enemies.append([0,e.Geral(450,80,13,13,'enemy')])
+    enemies.append([0,e.Geral(250,500,13,13,'enemy')])
+
+
 
 tempo_passo = 0
 
@@ -269,8 +275,10 @@ while True:
     player.change_frame(1)
     player.display(display,scroll)
 
+    #define a partir de quando o enemy começa a seguir o player
     display_r = pygame.Rect(scroll[0],scroll[1],300,200)
 
+    #define o enemy
     for enemy in enemies:
         if display_r.colliderect(enemy[1].obj.rect):
             enemy[0] += 0.2
