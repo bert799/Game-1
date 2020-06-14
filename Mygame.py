@@ -96,9 +96,17 @@ pygame.mixer.music.play(-1) #-1 para deixar a musica tocando infinitamente
 
 enemies = []
 for i in range(5):
-    enemies.append([0,e.Geral(300,80,13,13,'enemy')])
-    enemies.append([0,e.Geral(450,80,13,13,'enemy')])
-    enemies.append([0,e.Geral(250,500,13,13,'enemy')])
+    enemies.append([0,e.Geral(300,80,24,31,'enemy')])
+    enemies.append([0,e.Geral(450,80,24,31,'enemy')])
+    enemies.append([0,e.Geral(328,421,24,31,'enemy')])
+    enemies.append([0,e.Geral(160,517,24,31,'enemy')])
+    enemies.append([0,e.Geral(190,421,24,31,'enemy')])
+    enemies.append([0,e.Geral(84,485,24,31,'enemy')])
+    enemies.append([0,e.Geral(906,789,24,31,'enemy')])
+    enemies.append([0,e.Geral(708,789,24,31,'enemy')])
+    enemies.append([0,e.Geral(450,789,24,31,'enemy')])
+    enemies.append([0,e.Geral(160,517,24,31,'enemy')])
+    enemies.append([0,e.Geral(226,789,24,31,'enemy')])
 
 
 
@@ -279,14 +287,16 @@ while True:
                         numero_nivel = 1
                         px = 80
                         py = 96
-                        player.set_pos(px, py) 
+                        player.set_pos(px, py)       
                     elif local_porta == tile_names['D'][4]:
                         px = tile_names['D'][0].x
                         py = tile_names['D'][0].y
                         player.set_pos(px, py)    
                     # muda o estado do bau permanetemente
                     elif local_porta == tile_names['C'][0]:
-                        e.abre_o_bau('map1.txt', tile_names, 0)        
+                        #abre_o_bau('map1.txt', tile_names, 0) 
+                        open_chest = [0]
+                        chest_img = open_chest_img       
                 elif levels[numero_nivel] == 'map2':
                     if local_porta == tile_names['D'][0]:
                         numero_nivel = 0
@@ -329,13 +339,14 @@ while True:
             enemy_loc = pygame.Vector2(enemy[1].x, enemy[1].y)
             player_loc = pygame.Vector2(player.x, player.y)
             distance_player_enemy = enemy_loc.distance_to(player_loc)
-            #print(c)
             if player.obj.rect.colliderect(enemy[1].obj.rect):
                 player_y_momentum = -4
     
 #movimentacao com o teclado
     for event in pygame.event.get():
         if event.type == QUIT:
+            for i in open_chest:
+                abre_o_bau('map1.txt', tile_names, i)
             pygame.quit()
             sys.exit()
         if event.type == KEYDOWN:
