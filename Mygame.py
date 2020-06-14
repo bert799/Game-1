@@ -22,14 +22,14 @@ pygame.mixer.set_num_channels(64)
 pygame.display.set_caption('Meu game')
 
 #defini tamanho da janela
-WINDOW_SIZE = (640,320)
+WINDOW_SIZE = (600,400)
 
 TRANSPARENT = (0,0,0,0)
 
 screen = pygame.display.set_mode(WINDOW_SIZE,0,32) 
 
 #tamanho que será mostrado
-display = pygame.Surface((320,160)) 
+display = pygame.Surface((300,200)) 
 
 moving_right = False
 moving_left = False
@@ -71,7 +71,7 @@ chest_img = pygame.image.load('data/img/Chest.png')
 open_chest_img = pygame.image.load('data/img/open_chest.png')
 
 # Imagens de background
-background1 = pygame.image.load('data/img/background1.png')
+background1 = pygame.image.load('data/img/background1-Copia.png')
 background2 = pygame.image.load('data/img/background2.png')
 backgrounds = [background1, background2]
 background_rects = []
@@ -158,6 +158,7 @@ while True:
         if i == 0:
         # Atualiza a posição da imagem de fundo.
         #checa se o jogador esta movendo
+            background_rect.y = -48
             if moving_right:
                 background_rect.x -= 4/8
             elif moving_left:
@@ -172,6 +173,7 @@ while True:
         # Desenhamos a imagem novamente, mas deslocada da largura da imagem em x.
             background_rect2 = background_rect.copy()
             #checa se o jogador esta movendo
+            background_rect2.y = -48
             if moving_left or moving_right:
                 background_rect2.x += -scroll[0]/100
             display.blit(background, background_rect2)
