@@ -71,7 +71,7 @@ chest_img = pygame.image.load('data/img/Chest.png')
 open_chest_img = pygame.image.load('data/img/open_chest.png')
 
 # Imagens de background
-background1 = pygame.image.load('data/img/background1.png')
+background1 = pygame.image.load('data/img/background1-Copia.png')
 background2 = pygame.image.load('data/img/background2.png')
 backgrounds = [background1, background2]
 background_rects = []
@@ -166,6 +166,7 @@ while True:
         if i == 0:
         # Atualiza a posição da imagem de fundo.
         #checa se o jogador esta movendo
+            background_rect.y = -48
             if moving_right:
                 background_rect.x -= 4/8
             elif moving_left:
@@ -180,7 +181,7 @@ while True:
         # Desenhamos a imagem novamente, mas deslocada da largura da imagem em x.
             background_rect2 = background_rect.copy()
             #checa se o jogador esta movendo
-            background_rect2 = -48
+            background_rect2.y = -48
             if moving_left or moving_right:
                 background_rect2.x += -scroll[0]/100
             display.blit(background, background_rect2)
@@ -286,14 +287,16 @@ while True:
                         numero_nivel = 1
                         px = 80
                         py = 96
-                        player.set_pos(px, py) 
+                        player.set_pos(px, py)       
                     elif local_porta == tile_names['D'][4]:
                         px = tile_names['D'][0].x
                         py = tile_names['D'][0].y
                         player.set_pos(px, py)    
                     # muda o estado do bau permanetemente
                     elif local_porta == tile_names['C'][0]:
-                        e.abre_o_bau('map1.txt', tile_names, 0)        
+                        #abre_o_bau('map1.txt', tile_names, 0) 
+                        open_chest = [0]
+                        chest_img = open_chest_img       
                 elif levels[numero_nivel] == 'map2':
                     if local_porta == tile_names['D'][0]:
                         numero_nivel = 0
@@ -342,6 +345,8 @@ while True:
 #movimentacao com o teclado
     for event in pygame.event.get():
         if event.type == QUIT:
+            for i in open_chest:
+                abre_o_bau('map1.txt', tile_names, i)
             pygame.quit()
             sys.exit()
         if event.type == KEYDOWN:
