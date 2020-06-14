@@ -22,17 +22,6 @@ def collision_test(object_1, object_list, names):
                     name = key
     return collision_list, name
 
-# função modifica o mapa para que os baus que foram abertos fiquem abertos
-def abre_o_bau(map_file, names, num_chest):
-    line_chest = (names['C'][num_chest].y)/16
-    with open(map_file, 'r') as map_data:
-        blocos = map_data.readlines()
-        location_chest = str(blocos[int(line_chest)])
-        change_chest = location_chest.replace('C', 'O') 
-        blocos[int(line_chest)] = change_chest
-    with open(map_file, 'w') as map_data:
-        map_data.writelines(blocos)
-
 # Física
 class physics_obj(object):
    
@@ -178,20 +167,6 @@ class Geral(object):
             self.set_animation_tags(anim[1])
             self.animation_frame = 0
 
-    def get_Geral_angle(Geral_2):
-        x1 = self.x+int(self.size_x/2)
-        y1 = self.y+int(self.size_y/2)
-        x2 = Geral_2.x+int(Geral_2.size_x/2)
-        y2 = Geral_2.y+int(Geral_2.size_y/2)
-        angle = math.atan((y2-y1)/(x2-x1))
-        if x2 < x1:
-            angle += math.pi
-        return angle
-
-    def get_center(self):
-        x = self.x+int(self.size_x/2)
-        y = self.y+int(self.size_y/2)
-        return [x,y]
  
     def clear_animation(self):
         self.animation = None

@@ -22,14 +22,14 @@ pygame.mixer.set_num_channels(64)
 pygame.display.set_caption('Meu game')
 
 #defini tamanho da janela
-WINDOW_SIZE = (600,400)
+WINDOW_SIZE = (640,320)
 
 TRANSPARENT = (0,0,0,0)
 
 screen = pygame.display.set_mode(WINDOW_SIZE,0,32) 
 
 #tamanho que será mostrado
-display = pygame.Surface((300,200)) 
+display = pygame.Surface((320,160)) 
 
 moving_right = False
 moving_left = False
@@ -43,7 +43,7 @@ true_scroll = [0,0]
 
 #chama o arquivo txt do mapa
 def carrega_o_mapa(path):
-    m = open (path + '.txt', 'r')
+    m = open(path + '.txt', 'r')
     f = m.read()
     m.close()
     f = f.split('\n')
@@ -121,6 +121,17 @@ def deteccao_porta(object_1,object_list,names):
             return True, coordinates
     return False, coordinates    
 
+# função modifica o mapa para que os baus que foram abertos fiquem abertos
+def abre_o_bau(map_file, names, num_chest):
+    line_chest = (names['C'][num_chest].y)/16
+    with open(map_file, 'r') as map_data:
+        blocos = map_data.readlines()
+        location_chest = str(blocos[int(line_chest)])
+        change_chest = location_chest.replace('C', 'O') 
+        blocos[int(line_chest)] = change_chest
+    with open(map_file, 'w') as map_data:
+        map_data.writelines(blocos)
+
 #loop do jogo
 
 while True:
@@ -128,7 +139,7 @@ while True:
 
     # Carrega o mapa 
     mapa = carrega_o_mapa(levels[numero_nivel])
-    
+    #print(levels[numero_nivel])
     # Cria loop infinito musica
     if tempo_passo > 0:
         tempo_passo -= 1
@@ -227,37 +238,43 @@ while True:
 
 # Caso se o jogador tiver que interagir com uma porta
     if em_frente_porta:
-        if event.type == KEYUP:
+        if event.type == KEYDOWN:
             if event.key == K_e:
                 pygame.time.delay(200)
                 # detecta qual mapa o jogador se encontra
                 if levels[numero_nivel] == 'map1':
                     #define qual local o jogador sera teletransportado
                     if local_porta == tile_names['D'][0]:
-                        player.x = player.x+2
-                        player.y = player.y +2
+                        px = tile_names['D'][4].x
+                        py = tile_names['D'][4].y
+                        player.set_pos(px, py)
                     elif local_porta == tile_names['D'][1]:
-                        player.x = tile_names['D'][2].x
-                        player.y = tile_names['D'][2].y
+                        px = tile_names['D'][2].x
+                        py = tile_names['D'][2].y
+                        player.set_pos(px, py)
                     elif local_porta == tile_names['D'][2]:
-                        player.x = tile_names['D'][1].x
-                        player.y = tile_names['D'][1].y
+                        px = tile_names['D'][1].x
+                        py = tile_names['D'][1].y
+                        player.set_pos(px, py)
                     # muda o mapa do jogador
                     elif local_porta == tile_names['D'][3]:
-                        numero_nivel = 1
                         last_door = tile_names['D'][3]
-                        player.x = 0
-                        player.y = 0
+                        numero_nivel = 1
+                        px = 80
+                        py = 96
+                        player.set_pos(px, py) 
                     elif local_porta == tile_names['D'][4]:
-                        player.x = tile_names['D'][0].x
-                        player.y = tile_names['D'][0].y    
+                        px = tile_names['D'][0].x
+                        py = tile_names['D'][0].y
+                        player.set_pos(px, py)    
                     elif local_porta == tile_names['C'][0]:
                         e.abre_o_bau('map1.txt', tile_names, 0)        
                 elif levels[numero_nivel] == 'map2':
                     if local_porta == tile_names['D'][0]:
                         numero_nivel = 0
-                        player.x = last_door.x
-                        player.y = last_door.y
+                        px = last_door.x
+                        py = last_door.y
+                        player.set_pos(px, py)
     elif not em_frente_porta:
         e_prompt_img.fill(TRANSPARENT)
 
@@ -293,7 +310,10 @@ while True:
             if collision_types['bottom'] == True:
                 enemy[0] = 0
             enemy[1].display(display,scroll)
-
+            enemy_loc = pygame.Vector2(enemy[1].x, enemy[1].y)
+            player_loc = pygame.Vector2(player.x, player.y)
+            distance_player_enemy = enemy_loc.distance_to(player_loc)
+            #print(c)
             if player.obj.rect.colliderect(enemy[1].obj.rect):
                 player_y_momentum = -4
     
@@ -320,7 +340,7 @@ while True:
                 moving_right = False
             if event.key == K_LEFT:
                 moving_left = False
-    #print(player.x, player.y, tile_names['D'][4].x, tile_names['D'][4].y)
+    print(player.x, player.y)
     screen.blit(pygame.transform.scale(display, WINDOW_SIZE),(0,0))
     pygame.display.update()
     clock.tick(60 )# mantem o jogo em 60fps
