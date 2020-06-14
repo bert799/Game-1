@@ -139,48 +139,64 @@ while True:
 
     # Carrega o mapa 
     mapa = carrega_o_mapa(levels[numero_nivel])
-    #print(levels[numero_nivel])
+
     # Cria loop infinito musica
     if tempo_passo > 0:
         tempo_passo -= 1
-
+    
     #adicona o scroll ao mapa e o faz seguir o player
     true_scroll[0] += (player.x - true_scroll[0] - 130)/10
     true_scroll[1] += (player.y - true_scroll[1] - 95)/10
     scroll = true_scroll.copy()
     scroll[0] = int(scroll[0])
     scroll[1] = int(scroll[1])
-    
-
-    # adiciona o background
-    #pygame.draw.rect(display,(7,80,75),pygame.Rect(0,120,300,80))
-    #for background_object in background_objects:
-        #obj_rect = pygame.Rect(background_object[1][0]-scroll[0]*background_object[0],background_object[1][1]-scroll[1]*background_object[0],background_object[1][2],background_object[1][3])
-        #if background_object[0] == 0.5:
-            #pygame.draw.rect(display,(14,222,150),obj_rect)
-        #else:
-            #pygame.draw.rect(display,(9,91,85),obj_rect)
 
     # Atualiza a posição de cada camada do fundo e desenha
     for i in range(len(backgrounds)):
-        #world_speed = world_speeds[i]
         background = backgrounds[i]
         background_rect = background_rects[i]
-
+        if i == 0:
         # Atualiza a posição da imagem de fundo.
-        background_rect.x += -scroll[0]/16
+        #checa se o jogador esta movendo
+            if moving_right:
+                background_rect.x -= 4/8
+            elif moving_left:
+                background_rect.x += 4/8
         # Se o fundo saiu da janela, faz ele voltar para dentro.
-        if background_rect.right < 0:
-            background_rect.x += background_rect.width
+            if background_rect.right < 112:
+                background_rect.x += background_rect.width
         # Desenha o fundo e uma cópia para a direita.
         # Assumimos que a imagem selecionada ocupa pelo menos o tamanho da janela.
         # Além disso, ela deve ser cíclica, ou seja, o lado esquerdo deve ser continuação do direito.
-        display.blit(background, background_rect)
+            display.blit(background, background_rect)
         # Desenhamos a imagem novamente, mas deslocada da largura da imagem em x.
-        background_rect2 = background_rect.copy()
-        background_rect2.x += -scroll[0]/16
-        display.blit(background, background_rect2)
-
+            background_rect2 = background_rect.copy()
+            #checa se o jogador esta movendo
+            if moving_left or moving_right:
+                background_rect2.x += -scroll[0]/100
+            display.blit(background, background_rect2)
+        elif i == 1:
+            # Atualiza a posição da imagem de fundo.
+            #checa se o jogador esta movendo
+            if moving_right:
+                background_rect.x -= 1
+            if moving_left:
+                background_rect.x += 1
+        # Se o fundo saiu da janela, faz ele voltar para dentro.
+            if background_rect.right < 112:
+                background_rect.x += background_rect.width
+        # Desenha o fundo e uma cópia para a direita.
+        # Assumimos que a imagem selecionada ocupa pelo menos o tamanho da janela.
+        # Além disso, ela deve ser cíclica, ou seja, o lado esquerdo deve ser continuação do direito.
+            display.blit(background, background_rect)
+        # Desenhamos a imagem novamente, mas deslocada da largura da imagem em x.
+            background_rect2 = background_rect.copy()
+            #checa se o jogador esta movendo
+            if moving_right:
+                background_rect2.x -= 1
+            if moving_left:
+                background_rect2.x += 1
+            display.blit(background, background_rect2)
 
 #adiciona as plataformas, grouds e outros objetos definidos no mapa
     tile_rects = []
@@ -232,7 +248,6 @@ while True:
         player.set_flip(True)
         player.set_action('run')
 
-
     collisions_types = player.move(player_movement,tile_rects, tile_names)
     em_frente_porta,local_porta = deteccao_porta(player,tile_rects, tile_names)
 
@@ -267,6 +282,7 @@ while True:
                         px = tile_names['D'][0].x
                         py = tile_names['D'][0].y
                         player.set_pos(px, py)    
+                    # muda o estado do bau permanetemente
                     elif local_porta == tile_names['C'][0]:
                         e.abre_o_bau('map1.txt', tile_names, 0)        
                 elif levels[numero_nivel] == 'map2':
@@ -275,8 +291,6 @@ while True:
                         px = last_door.x
                         py = last_door.y
                         player.set_pos(px, py)
-    elif not em_frente_porta:
-        e_prompt_img.fill(TRANSPARENT)
 
 # estabelece o tempo no ar e colisões com o ground
     if collisions_types['bottom'] == True:
@@ -340,7 +354,7 @@ while True:
                 moving_right = False
             if event.key == K_LEFT:
                 moving_left = False
-    print(player.x, player.y)
+
     screen.blit(pygame.transform.scale(display, WINDOW_SIZE),(0,0))
     pygame.display.update()
     clock.tick(60 )# mantem o jogo em 60fps
