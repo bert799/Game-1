@@ -22,14 +22,14 @@ pygame.mixer.set_num_channels(64)
 pygame.display.set_caption('Meu game')
 
 #defini tamanho da janela
-WINDOW_SIZE = (640,320)
+WINDOW_SIZE = (600,400)
 
 TRANSPARENT = (0,0,0,0)
 
 screen = pygame.display.set_mode(WINDOW_SIZE,0,32) 
 
 #tamanho que será mostrado
-display = pygame.Surface((320,160)) 
+display = pygame.Surface((300,200)) 
 
 moving_right = False
 moving_left = False
@@ -96,9 +96,17 @@ pygame.mixer.music.play(-1) #-1 para deixar a musica tocando infinitamente
 
 enemies = []
 for i in range(5):
-    enemies.append([0,e.Geral(300,80,13,13,'enemy')])
-    enemies.append([0,e.Geral(450,80,13,13,'enemy')])
-    enemies.append([0,e.Geral(250,500,13,13,'enemy')])
+    enemies.append([0,e.Geral(300,80,24,31,'enemy')])
+    enemies.append([0,e.Geral(450,80,24,31,'enemy')])
+    enemies.append([0,e.Geral(328,421,24,31,'enemy')])
+    enemies.append([0,e.Geral(160,517,24,31,'enemy')])
+    enemies.append([0,e.Geral(190,421,24,31,'enemy')])
+    enemies.append([0,e.Geral(84,485,24,31,'enemy')])
+    enemies.append([0,e.Geral(906,789,24,31,'enemy')])
+    enemies.append([0,e.Geral(708,789,24,31,'enemy')])
+    enemies.append([0,e.Geral(450,789,24,31,'enemy')])
+    enemies.append([0,e.Geral(160,517,24,31,'enemy')])
+    enemies.append([0,e.Geral(226,789,24,31,'enemy')])
 
 
 
@@ -172,6 +180,7 @@ while True:
         # Desenhamos a imagem novamente, mas deslocada da largura da imagem em x.
             background_rect2 = background_rect.copy()
             #checa se o jogador esta movendo
+            background_rect2 = -48
             if moving_left or moving_right:
                 background_rect2.x += -scroll[0]/100
             display.blit(background, background_rect2)
@@ -327,7 +336,6 @@ while True:
             enemy_loc = pygame.Vector2(enemy[1].x, enemy[1].y)
             player_loc = pygame.Vector2(player.x, player.y)
             distance_player_enemy = enemy_loc.distance_to(player_loc)
-            #print(c)
             if player.obj.rect.colliderect(enemy[1].obj.rect):
                 player_y_momentum = -4
     
