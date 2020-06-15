@@ -1,6 +1,7 @@
 import pygame, math, os
 from pygame.locals import *
 
+# Define colorkey como branco
 global e_colorkey
 e_colorkey = (255,255,255)
 
@@ -8,9 +9,9 @@ def set_global_colorkey(colorkey):
     global e_colorkey
     e_colorkey = colorkey
 
-# inicio do código sobre a física do jogo
+# Inicio do código sobre a física do jogo
 
-# colisões retorna o nome do bloco colidido para identificação
+# Colisões retorna o nome do bloco colidido para identificação
 def collision_test(object_1, object_list, names):
     collision_list = []
     name = ''
@@ -23,7 +24,7 @@ def collision_test(object_1, object_list, names):
     return collision_list, name
 
 # Física
-class physics_obj(object):
+class Fisica_obj(object):
    
     def __init__(self,x,y,x_size,y_size):
         self.width = x_size
@@ -31,7 +32,7 @@ class physics_obj(object):
         self.rect = pygame.Rect(x,y,self.width,self.height)
         self.x = x
         self.y = y
-    # funçao que recebe colisão e define reação   
+    # Funçao que recebe colisão e define reação   
     def move(self,movement,platforms,names):
         self.x += movement[0]
         self.rect.x = int(self.x)
@@ -67,34 +68,7 @@ class physics_obj(object):
             self.y = self.rect.y
         return collision_types
 
-#detecta colisões
-
-class cuboid(object):
-    
-    def __init__(self,x,y,z,x_size,y_size,z_size):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.x_size = x_size
-        self.y_size = y_size
-        self.z_size = z_size
-        
-    def set_pos(self,x,y,z):
-        self.x = x
-        self.y = y
-        self.z = z
-        
-    def collidecuboid(self,cuboid_2):
-        cuboid_1_xy = pygame.Rect(self.x,self.y,self.x_size,self.y_size)
-        cuboid_1_yz = pygame.Rect(self.y,self.z,self.y_size,self.z_size)
-        cuboid_2_xy = pygame.Rect(cuboid_2.x,cuboid_2.y,cuboid_2.x_size,cuboid_2.y_size)
-        cuboid_2_yz = pygame.Rect(cuboid_2.y,cuboid_2.z,cuboid_2.y_size,cuboid_2.z_size)
-        if (cuboid_1_xy.colliderect(cuboid_2_xy)) and (cuboid_1_yz.colliderect(cuboid_2_yz)):
-            return True
-        else:
-            return False
-
-#função Geral
+# Função Geral (faz as animações, imagens etc)
 
 def simple_Geral(x,y,e_type):
     return Geral(x,y,1,1,e_type)
@@ -115,7 +89,7 @@ class Geral(object):
         self.y = y
         self.size_x = size_x
         self.size_y = size_y
-        self.obj = physics_obj(x,y,size_x,size_y)
+        self.obj = Fisica_obj(x,y,size_x,size_y)
         self.animation = None
         self.image = None
         self.animation_frame = 0
@@ -129,7 +103,7 @@ class Geral(object):
         self.set_action('idle') 
         self.Geral_data = {}
         self.alpha = None
- 
+# define posção da entidade no mapa
     def set_pos(self,x,y):
         self.x = x
         self.y = y
@@ -137,7 +111,7 @@ class Geral(object):
         self.obj.y = y
         self.obj.rect.x = x
         self.obj.rect.y = y
- 
+# define o movimento e colisões no mapa
     def move(self,momentum,platforms, names):
         collisions = self.obj.move(momentum,platforms, names)
         self.x = self.obj.x
@@ -153,10 +127,6 @@ class Geral(object):
     def set_animation_tags(self,tags):
         self.animation_tags = tags
  
-    def set_animation(self,sequence):
-        self.animation = sequence
-        self.animation_frame = 0
- 
     def set_action(self,action_id,force=False):
         if (self.action == action_id) and (force == False):
             pass
@@ -166,16 +136,9 @@ class Geral(object):
             self.animation = anim[0]
             self.set_animation_tags(anim[1])
             self.animation_frame = 0
-
  
     def clear_animation(self):
         self.animation = None
- 
-    def set_image(self,image):
-        self.image = image
- 
-    def set_offset(self,offset):
-        self.offset = offset
  
     def set_frame(self,amount):
         self.animation_frame = amount
@@ -193,9 +156,6 @@ class Geral(object):
                     self.animation_frame -= len(self.animation)
                 else:
                     self.animation_frame = len(self.animation)-1
- 
-
- 
     def display(self,surface,scroll):
         image_to_render = None
         if self.animation == None:
@@ -214,7 +174,7 @@ class Geral(object):
     def attack(self, image):
         now = getticks      
  
-# animações
+# Animações
 
 global animation_database
 animation_database = {}
@@ -263,14 +223,5 @@ def load_animations(path):
             animation_higher_database[Geral_type] = {}
         animation_higher_database[Geral_type][animation_id] = [anim.copy(),tags]        
 
-# função q troca a cor
 
-def swap_color(img,old_c,new_c):
-    global e_colorkey
-    img.set_colorkey(old_c)
-    surf = img.copy()
-    surf.fill(new_c)
-    surf.blit(img,(0,0))
-    surf.set_colorkey(e_colorkey)
-    return surf
 

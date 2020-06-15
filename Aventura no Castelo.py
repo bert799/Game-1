@@ -1,49 +1,45 @@
-#importa as funções iniciais
+# Importa as funções iniciais
 import pygame, sys, os, random
-
-import data.engine as e 
-
-#inicializa a função tempo
-clock = pygame.time.Clock()
-#função pai
+import data.Motor as e 
 from pygame.locals import*
 
-#pré inicializa a musica para tirar o delay(frequencia, tamanho, chanel(mono/stereo), toca imediatamente(buf))
+
+# Inicializa a função tempo
+clock = pygame.time.Clock()
+
+
+# Pré-inicializa a musica para tirar o delay(frequencia, tamanho, chanel(mono/stereo), toca imediatamente(buf))
 pygame.mixer.pre_init(44100, -16, 2, 512)
 
-#inicia o pygame
+# Inicia o pygame e o mixer
 pygame.init()
 pygame.mixer.init()
 
-#adiciona mais channels para futuras iterações
-pygame.mixer.set_num_channels(64)
-
-#nome da janela
+# Nome da janela
 pygame.display.set_caption('Meu game')
 
-#defini tamanho da janela
-WIDTH = 600
+# Define tamanho da janela
+WIDTH = 600 
 HEIGHT = 400
 WINDOW_SIZE = (WIDTH,HEIGHT)
 
-TRANSPARENT = (0,0,0,0)
-
 screen = pygame.display.set_mode(WINDOW_SIZE,0,32) 
 
-#tamanho que será mostrado
+# Tamanho que será mostrado
 display = pygame.Surface((WIDTH/2,HEIGHT/2)) 
 
 moving_right = False
 moving_left = False
-player_y_momentum = 0 #gravidade
+player_y_momentum = 0 
 air_timer = 0
 
-#scroll adiciona movimento a tela e ao personagem dando efeito de paralaxe
+# Scroll adiciona movimento a tela e ao personagem dando efeito de paralaxe
 true_scroll = [0,0]
-##
 
+# Usado no Menu
+black = (0,0,0)
 
-#chama o arquivo txt do mapa
+# Chama o arquivo txt do mapa
 def carrega_o_mapa(path):
     m = open(path + '.txt', 'r')
     f = m.read()
@@ -54,16 +50,16 @@ def carrega_o_mapa(path):
         mapa_jog.append(list(row))
     return mapa_jog
 
-#carrega animação
+# Carrega animação
 e.load_animations('data/img/Geral/')
-#
 
-#lista com os mapas
-levels = ['map1', 'map2']
+
+# Lista com os mapas
+levels = ['data/map1', 'data/map2']
 numero_nivel = 0
-###
 
-#carrega as imagens
+
+# Carrega as imagens dos tiles usados no mapa
 ground_img = pygame.image.load('data/img/ground_1.png')
 plataform_img = pygame.image.load('data/img/platform.png')
 wall_img = pygame.image.load('data/img/wall.png')
@@ -81,20 +77,23 @@ for background in backgrounds:
         background_rects.append(background.get_rect())
 
 
-#Musicas
+# Músicas
 jump_sound = pygame.mixer.Sound('data/audio/jump.wav')
-jump_sound.set_volume(0.2)
+jump_sound.set_volume(0.2) ##
 sons_passo = [pygame.mixer.Sound('data/audio/passo_0.wav'), pygame.mixer.Sound('data/audio/passo_1.wav')]
 sons_passo[0].set_volume(0.2) #ajusta altura do som
 sons_passo[1].set_volume(0.2) ##
 
-#musica tema
+# Música tema
 pygame.mixer.music.load('data/audio/music.wav')
 pygame.mixer.music.set_volume(0.4)
 
 pygame.mixer.music.play(-1) #-1 para deixar a musica tocando infinitamente
-#
 
+# Background do menu
+Menu = pygame.image.load('data/img/background.png')
+
+# Gera os inimigos
 enemies = []
 for i in range(5):
     enemies.append([0,e.Geral(300,80,24,31,'enemy')])
@@ -110,19 +109,14 @@ for i in range(5):
     enemies.append([0,e.Geral(226,789,24,31,'enemy')])
 
 
-
+# Tempo para rodar a musica do passo
 tempo_passo = 0
 
-player= e.Geral(100,100,16,27,'player')# ajusta o tamanho do personagem com as plataformas
-
+# Ajusta o tamanho do personagem com as plataformas
+player= e.Geral(100,100,16,27,'player')
 score = 0
-###
 
-#objetos no fundo do mapa
-background_objects = [[0.25,[120,10,70,400]],[0.25,[280,30,40,400]],[0.5,[30,40,40,400]],[0.5,[130,90,100,400]],[0.5,[300,80,120,400]]]
-###
-
-# detecta se o jogador esta em frente de uma porta
+# Detecta se o jogador esta em frente de uma porta
 def deteccao_porta(object_1,object_list,names):
     coordinates = 0
     collision_list, tile_type = e.collision_test(object_1, object_list, names)
@@ -132,7 +126,7 @@ def deteccao_porta(object_1,object_list,names):
             return True, coordinates
     return False, coordinates    
 
-# função modifica o mapa para que os baus que foram abertos fiquem abertos
+# Função modifica o mapa para que os baus que foram abertos fiquem abertos
 def abre_o_bau(map_file, names, num_chest):
     line_chest = (names['C'][num_chest].y)/16
     with open(map_file, 'r') as map_data:
@@ -143,9 +137,21 @@ def abre_o_bau(map_file, names, num_chest):
     with open(map_file, 'w') as map_data:
         map_data.writelines(blocos)
 
-#loop do jogo
-
+# Loop do jogo
+rodando = True
+menu = True 
 while True:
+    while menu:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit()
+            elif event.type == pygame.KEYDOWN:
+                menu = False
+        screen.fill((0,0,0))
+        clock.tick(30)
+        screen.blit(Menu, (0,0))
+        pygame.display.update()
+
     display.fill((146,244,255))
 
     # Carrega o mapa 
@@ -155,7 +161,7 @@ while True:
     if tempo_passo > 0:
         tempo_passo -= 1
     
-    #adicona o scroll ao mapa e o faz seguir o player
+    # Adicona o scroll ao mapa e o faz seguir o player
     true_scroll[0] += (player.x - true_scroll[0] - 130)/10
     true_scroll[1] += (player.y - true_scroll[1] - 95)/10
     scroll = true_scroll.copy()
@@ -168,7 +174,7 @@ while True:
         background_rect = background_rects[i]
         if i == 0:
         # Atualiza a posição da imagem de fundo.
-        #checa se o jogador esta movendo
+         # Checa se o jogador esta movendo
             background_rect.y = -48
             if moving_right:
                 background_rect.x -= 4/8
@@ -183,14 +189,14 @@ while True:
             display.blit(background, background_rect)
         # Desenhamos a imagem novamente, mas deslocada da largura da imagem em x.
             background_rect2 = background_rect.copy()
-            #checa se o jogador esta movendo
+            # Checa se o jogador esta movendo
             background_rect2.y = -48
             if moving_left or moving_right:
                 background_rect2.x += -scroll[0]/100
             display.blit(background, background_rect2)
         elif i == 1:
             # Atualiza a posição da imagem de fundo.
-            #checa se o jogador esta movendo
+            # Checa se o jogador esta movendo
             if moving_right:
                 background_rect.x -= 1
             if moving_left:
@@ -211,7 +217,7 @@ while True:
                 background_rect2.x += 1
             display.blit(background, background_rect2)
 
-#adiciona as plataformas, grouds e outros objetos definidos no mapa
+# Adiciona as plataformas, grouds e outros objetos definidos no mapa
     tile_rects = []
     tile_names = {}
     y=0
@@ -239,7 +245,7 @@ while True:
             x+=1
         y +=1
 
-# movimento + gravidade + animacoes
+# Movimento + gravidade + animacoes
     player_movement = [0,0]
     if moving_right == True:
         player_movement[0] +=2
@@ -249,7 +255,7 @@ while True:
     player_y_momentum +=0.2
     if player_y_momentum > 3:
         player_y_momentum = 3
-
+# Mudava o estado do jogador para as animações
     if player_y_momentum == 3:
         player.set_action('run')
     if player_movement[0] == 0:
@@ -260,7 +266,7 @@ while True:
     if player_movement[0] < 0:
         player.set_flip(True)
         player.set_action('run')
-
+# define colisões do jogador com o ambiente
     collisions_types = player.move(player_movement,tile_rects, tile_names)
     em_frente_porta,local_porta = deteccao_porta(player,tile_rects, tile_names)
 
@@ -269,9 +275,9 @@ while True:
         if event.type == KEYDOWN:
             if event.key == K_e:
                 pygame.time.delay(200)
-                # detecta qual mapa o jogador se encontra
-                if levels[numero_nivel] == 'map1':
-                    #define qual local o jogador sera teletransportado
+                # Detecta qual mapa o jogador se encontra
+                if levels[numero_nivel] == 'data/map1':
+                    # Define qual local o jogador sera teletransportado
                     if local_porta == tile_names['D'][0]:
                         px = tile_names['D'][4].x
                         py = tile_names['D'][4].y
@@ -284,7 +290,7 @@ while True:
                         px = tile_names['D'][1].x
                         py = tile_names['D'][1].y
                         player.set_pos(px, py)
-                    # muda o mapa do jogador
+                    # Muda o mapa do jogador
                     elif local_porta == tile_names['D'][3]:
                         last_door = tile_names['D'][3]
                         numero_nivel = 1
@@ -295,45 +301,44 @@ while True:
                         px = tile_names['D'][0].x
                         py = tile_names['D'][0].y
                         player.set_pos(px, py)    
-                    # muda o estado do bau permanetemente
+                    # Muda o estado do bau permanetemente
                     elif local_porta == tile_names['C'][0]:
-                        abre_o_bau('map1.txt', tile_names, 0)
+                        abre_o_bau('data/map1.txt', tile_names, 0)
                         score += 1000 
                     elif local_porta == tile_names['C'][1]:
-                        abre_o_bau('map1.txt', tile_names, 1)
-                        score += 1000        
-                elif levels[numero_nivel] == 'map2':
+                        abre_o_bau('data/map1.txt', tile_names, 1)
+                        score += 1000     
+                elif levels[numero_nivel] == 'data/map2':
                     if local_porta == tile_names['D'][0]:
                         numero_nivel = 0
                         px = last_door.x
                         py = last_door.y
                         player.set_pos(px, py)
                     elif local_porta == tile_names['C'][0]:
-                        abre_o_bau('map2.txt', tile_names, 0)
+                        abre_o_bau('data/map2.txt', tile_names, 0)
                         score += 1000 
                     elif local_porta == tile_names['C'][1]:
-                        abre_o_bau('map2.txt', tile_names, 1)
+                        abre_o_bau('data/map2.txt', tile_names, 1)
                         score += 1000
 
-
-# estabelece o tempo no ar e colisões com o ground
+# Estabelece o tempo no ar e colisões com o ground
     if collisions_types['bottom'] == True:
         air_timer = 0
         player_y_momentum = 0
-        if player_movement[0] != 0: # solta o volume apenas quando detecta colisão bottom
+        if player_movement[0] != 0: # Solta o volume apenas quando detecta colisão bottom
             if tempo_passo == 0:
                 tempo_passo = 30
                 random.choice(sons_passo).play()
     else:
         air_timer += 1
-#estabelece as animações
+# Estabelece as animações
     player.change_frame(1)
     player.display(display,scroll)
 
-    #define a partir de quando o enemy começa a seguir o player
+    # Define a partir de quando o enemy começa a seguir o player
     display_r = pygame.Rect(scroll[0],scroll[1],300,200)
 
-    #define o enemy
+    # Define o enemy
     for enemy in enemies:
         if display_r.colliderect(enemy[1].obj.rect):
             enemy[0] += 0.2
@@ -348,23 +353,26 @@ while True:
             if collision_types['bottom'] == True:
                 enemy[0] = 0
             enemy[1].display(display,scroll)
+            # joga o jogador para cima caso colida com um inimigo
             if player.obj.rect.colliderect(enemy[1].obj.rect):
                 player_y_momentum = -4
     
-#movimentacao com o teclado
+# Movimentacao com o teclado
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
         if event.type == KEYDOWN:
-            if event.key == K_w: # desliga a música 
-                pygame.mixer.music.fadeout(1000) # delay para a música não parar imediatamente
-            if event.key == K_r: # liga a música
+            if event.key == K_w: # Desliga a música 
+                pygame.mixer.music.fadeout(1000) # Delay para a música não parar imediatamente
+            if event.key == K_r: # Liga a música
                 pygame.mixer.music.play(-1) #-1 para voltar a tocar infinitamente
             if event.key == K_RIGHT:
                 moving_right = True
             if event.key == K_LEFT:
                 moving_left = True
+            if event.key == K_p:
+                menu = True
             if event.key == K_UP:
                 if air_timer < 6:
                     jump_sound.play()
@@ -374,8 +382,8 @@ while True:
                 moving_right = False
             if event.key == K_LEFT:
                 moving_left = False
-
+    
     screen.blit(pygame.transform.scale(display, WINDOW_SIZE),(0,0))
     pygame.display.update()
-    clock.tick(60 )# mantem o jogo em 60fps
+    clock.tick(60)# Mantem o jogo em 60fps
 
