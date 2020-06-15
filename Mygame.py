@@ -22,14 +22,16 @@ pygame.mixer.set_num_channels(64)
 pygame.display.set_caption('Meu game')
 
 #defini tamanho da janela
-WINDOW_SIZE = (600,400)
+WIDTH = 600
+HEIGHT = 400
+WINDOW_SIZE = (WIDTH,HEIGHT)
 
 TRANSPARENT = (0,0,0,0)
 
 screen = pygame.display.set_mode(WINDOW_SIZE,0,32) 
 
 #tamanho que será mostrado
-display = pygame.Surface((300,200)) 
+display = pygame.Surface((WIDTH/2,HEIGHT/2)) 
 
 moving_right = False
 moving_left = False
@@ -66,7 +68,6 @@ ground_img = pygame.image.load('data/img/ground_1.png')
 plataform_img = pygame.image.load('data/img/platform.png')
 wall_img = pygame.image.load('data/img/wall.png')
 door_img = pygame.image.load('data/img/door.png')
-e_prompt_img = pygame.image.load('data/img/e.png')
 chest_img = pygame.image.load('data/img/Chest.png')
 open_chest_img = pygame.image.load('data/img/open_chest.png')
 
@@ -113,6 +114,8 @@ for i in range(5):
 tempo_passo = 0
 
 player= e.Geral(100,100,16,27,'player')# ajusta o tamanho do personagem com as plataformas
+
+score = 0
 ###
 
 #objetos no fundo do mapa
@@ -294,15 +297,24 @@ while True:
                         player.set_pos(px, py)    
                     # muda o estado do bau permanetemente
                     elif local_porta == tile_names['C'][0]:
-                        #abre_o_bau('map1.txt', tile_names, 0) 
-                        open_chest = [0]
-                        chest_img = open_chest_img       
+                        abre_o_bau('map1.txt', tile_names, 0)
+                        score += 1000 
+                    elif local_porta == tile_names['C'][1]:
+                        abre_o_bau('map1.txt', tile_names, 1)
+                        score += 1000        
                 elif levels[numero_nivel] == 'map2':
                     if local_porta == tile_names['D'][0]:
                         numero_nivel = 0
                         px = last_door.x
                         py = last_door.y
                         player.set_pos(px, py)
+                    elif local_porta == tile_names['C'][0]:
+                        abre_o_bau('map2.txt', tile_names, 0)
+                        score += 1000 
+                    elif local_porta == tile_names['C'][1]:
+                        abre_o_bau('map2.txt', tile_names, 1)
+                        score += 1000
+
 
 # estabelece o tempo no ar e colisões com o ground
     if collisions_types['bottom'] == True:
@@ -336,17 +348,12 @@ while True:
             if collision_types['bottom'] == True:
                 enemy[0] = 0
             enemy[1].display(display,scroll)
-            enemy_loc = pygame.Vector2(enemy[1].x, enemy[1].y)
-            player_loc = pygame.Vector2(player.x, player.y)
-            distance_player_enemy = enemy_loc.distance_to(player_loc)
             if player.obj.rect.colliderect(enemy[1].obj.rect):
                 player_y_momentum = -4
     
 #movimentacao com o teclado
     for event in pygame.event.get():
         if event.type == QUIT:
-            for i in open_chest:
-                abre_o_bau('map1.txt', tile_names, i)
             pygame.quit()
             sys.exit()
         if event.type == KEYDOWN:

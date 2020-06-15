@@ -180,10 +180,6 @@ class Geral(object):
     def set_frame(self,amount):
         self.animation_frame = amount
  
-    def handle(self):
-        self.action_timer += 1
-        self.change_frame(1)
- 
     def change_frame(self,amount):
         self.animation_frame += amount
         if self.animation != None:
@@ -198,29 +194,7 @@ class Geral(object):
                 else:
                     self.animation_frame = len(self.animation)-1
  
-    def get_current_img(self):
-        if self.animation == None:
-            if self.image != None:
-                return flip(self.image,self.flip)
-            else:
-                return None
-        else:
-            return flip(animation_database[self.animation[self.animation_frame]],self.flip)
 
-    def get_drawn_img(self):
-        image_to_render = None
-        if self.animation == None:
-            if self.image != None:
-                image_to_render = flip(self.image,self.flip).copy()
-        else:
-            image_to_render = flip(animation_database[self.animation[self.animation_frame]],self.flip).copy()
-        if image_to_render != None:
-            center_x = image_to_render.get_width()/2
-            center_y = image_to_render.get_height()/2
-            image_to_render = pygame.transform.rotate(image_to_render,self.rotation)
-            if self.alpha != None:
-                image_to_render.set_alpha(self.alpha)
-            return image_to_render, center_x, center_y
  
     def display(self,surface,scroll):
         image_to_render = None
@@ -236,6 +210,9 @@ class Geral(object):
             if self.alpha != None:
                 image_to_render.set_alpha(self.alpha)
             blit_center(surface,image_to_render,(int(self.x)-scroll[0]+self.offset[0]+center_x,int(self.y)-scroll[1]+self.offset[1]+center_y))
+
+    def attack(self, image):
+        now = getticks      
  
 # animações
 
